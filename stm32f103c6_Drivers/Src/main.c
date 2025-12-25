@@ -1,89 +1,65 @@
-/*
- * main.c
- * STM32F103C6 Keypad Test Program
- */
 #include "stm32f103c6_GPIO_Driver.h"
-#include "Keypad.h"
+#include "stm32f103c6_EXTI_Driver.h"
 #include "lcd.h"
 
-// Keypad configuration
-KEYPAD_PinConfig MyKeypad;
 Lcd_Pins_t MyLcd;
+uint8_t IQR_Flag = 0;
 
+void MyWait(uint32_t x){
+    for(uint32_t i = 0; i < x; i++){
+        for(uint32_t l = 0; l < x; l++);
+    }
+}
 
-// SWAPPED to match your Proteus wiring:
-// Rows are connected to PA0-PA3 (left side of keypad: A, B, C, D)
-// Columns are connected to PA4-PA7 (bottom of keypad: 1, 2, 3, 4)
-// Correct pin assignment for standard keypad orientation
-
-uint16_t RowPins[4] = { GPIO_PIN_0, GPIO_PIN_1, GPIO_PIN_2, GPIO_PIN_3 };
-uint16_t ColPins[4] = { GPIO_PIN_4, GPIO_PIN_5, GPIO_PIN_6, GPIO_PIN_7 };
-uint16_t LcdPins[8] = { GPIO_PIN_3, GPIO_PIN_4, GPIO_PIN_5, GPIO_PIN_6,
-						GPIO_PIN_7, GPIO_PIN_8, GPIO_PIN_9, GPIO_PIN_10 };
-
-// Key pressed variable
-volatile uint8_t Button;
+void EXTI9_PB9_CallBack(void){
+    IQR_Flag = 1;  // Only set flag
+}
 
 int main(void)
 {
-    // 1. Enable GPIO clocks
     RCC_GPIOA_CLK_EN();
     RCC_GPIOB_CLK_EN();
+    RCC_AFIO_CLK_EN();
 
-    // 2. Configure Keypad structure
-    MyKeypad.GPIOx = GPIOA;
-    MyLcd.GPIOx = GPIOB;
+    // LCD data pins
+    MyLcd.GPIOx = GPIOA;
+    uint16_t data_pins[8] = {GPIO_PIN_0, GPIO_PIN_1, GPIO_PIN_2, GPIO_PIN_3,
+                              GPIO_PIN_4, GPIO_PIN_5, GPIO_PIN_6, GPIO_PIN_7};
+    for(uint8_t i = 0; i < 8; i++){
+        MyLcd.LCD_PINS[i].GPIO_PinNumber = data_pins[i];
+        MyLcd.LCD_PINS[i].GPIO_Mode = GPIO_MODE_OUTPUT_PUSH_PULL;
+        MyLcd.LCD_PINS[i].GPIO_Output_Speed = GPIO_OUTPUT_SPEED_10MHz;
+        MCAL_GPIO_Init(GPIOA, &MyLcd.LCD_PINS[i]);
+    }
 
-
-    MyLcd.EN_PIN.GPIO_PinNumber = GPIO_PIN_0;
+    // EN and RS
+    MyLcd.EN_PIN.GPIO_PinNumber = GPIO_PIN_8;
     MyLcd.EN_PIN.GPIO_Mode = GPIO_MODE_OUTPUT_PUSH_PULL;
-    MyLcd.EN_PIN.GPIO_Output_Speed = GPIO_OUTPUT_SPEED_2MHz;
+    MyLcd.EN_PIN.GPIO_Output_Speed = GPIO_OUTPUT_SPEED_10MHz;
+    MCAL_GPIO_Init(GPIOA, &MyLcd.EN_PIN);
 
-    MyLcd.RS_PIN.GPIO_PinNumber = GPIO_PIN_1;
+    MyLcd.RS_PIN.GPIO_PinNumber = GPIO_PIN_9;
     MyLcd.RS_PIN.GPIO_Mode = GPIO_MODE_OUTPUT_PUSH_PULL;
-    MyLcd.RS_PIN.GPIO_Output_Speed = GPIO_OUTPUT_SPEED_2MHz;
+    MyLcd.RS_PIN.GPIO_Output_Speed = GPIO_OUTPUT_SPEED_10MHz;
+    MCAL_GPIO_Init(GPIOA, &MyLcd.RS_PIN);
 
-    for(int i =0 ; i<8 ; i++){
-    	MyLcd.LCD_PINS[i].GPIO_PinNumber = LcdPins[i];
-    	MyLcd.LCD_PINS[i].GPIO_Mode = GPIO_MODE_OUTPUT_PUSH_PULL;
-    	MyLcd.LCD_PINS[i].GPIO_Output_Speed = GPIO_OUTPUT_SPEED_2MHz;
-    }
-
-
-    // Columns → outputs push-pull (PA4-PA7)
-    for(uint8_t c = 0; c < KEYPAD_COL; c++)
-    {
-        MyKeypad.KeypadCols[c].GPIO_PinNumber = ColPins[c];
-        MyKeypad.KeypadCols[c].GPIO_Mode = GPIO_MODE_OUTPUT_PUSH_PULL;
-        MyKeypad.KeypadCols[c].GPIO_Output_Speed = GPIO_OUTPUT_SPEED_2MHz;
-    }
-
-    // Rows → inputs pull-up (PA0-PA3)
-    for(uint8_t r = 0; r < KEYPAD_ROWS; r++)
-    {
-        MyKeypad.KeypadRows[r].GPIO_PinNumber = RowPins[r];
-        MyKeypad.KeypadRows[r].GPIO_Mode = GPIO_MODE_INPUT_PU;
-    }
-
-    // 3. Initialize keypad
-    KEYPAD_Init(&MyKeypad);
+    // Initialize LCD
     LCD_Init(&MyLcd);
 
-    LCD_WriteCharData('y', &MyLcd);
+    // Configure EXTI
+    EXTI_PinConfig_t EXTI_CFG;
+    EXTI_CFG.EXTI_PIN = EXTI_DEFINE_EXTI9_PB9;
+    EXTI_CFG.Trigger_Case = EXTI_TRIGGER_RISING;
+    EXTI_CFG.P_IRQ_CallBack = EXTI9_PB9_CallBack;
+    EXTI_CFG.IQR_EN = EXTI_IRQ_ENABLE;
+    MCAL_EXTI_GPIO_Init(&EXTI_CFG);
 
-    // 4. Main loop
-    while(1)
-    {
-        Button = KEYPAD_GetChar(&MyKeypad);
-
-        if(Button != RELEASED_BUTTON)
-        {
-            // Key was pressed - add breakpoint here to check value
-            volatile uint8_t pressed = Button;
-            LCD_WriteCharData(pressed, &MyLcd);
+    while(1){
+        if(IQR_Flag){
+            LCD_SendCommand(_LCD_CLEAR, &MyLcd);
+            LCD_WriteStringData("ABOOOOD", &MyLcd);
+            IQR_Flag = 0;
+            MyWait(100);
         }
-
-        // Small delay
-        for(volatile uint32_t i = 0; i < 100; i++);
     }
 }
