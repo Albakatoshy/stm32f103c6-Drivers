@@ -69,9 +69,24 @@
 //GPIO (E)   Ports not included in LQF48 Package
 #define GPIOE_BASE_ADDRESS								0x40011800UL
 
+
+
+//					UART1
+#define USART1_BASE_ADDRESS								0x40013800UL
+
+
 //----------------------------------
 //Base Addresses For The APB1 Peripherals
 //----------------------------------
+
+//					UART2
+#define USART2_BASE_ADDRESS								0x40004400UL
+
+
+//					UART3
+#define USART3_BASE_ADDRESS								0x40004800UL
+
+
 
 
 //=======================================================
@@ -128,6 +143,20 @@ typedef struct{
 }AFIO_TypeDef;
 
 
+typedef struct{
+	volatile uint32_t USART_SR;
+	volatile uint32_t USART_DR;
+	volatile uint32_t USART_BRR;
+	volatile uint32_t USART_CR1;
+	volatile uint32_t USART_CR2;
+	volatile uint32_t USART_CR3;
+	volatile uint32_t USART_GTPR;
+}USART_TypeDef;
+
+
+
+
+
 //=======================================================
 
 //Peripheral Instant
@@ -142,6 +171,10 @@ typedef struct{
 #define EXTI					((EXTI_TypeDef *)EXTI_BASE_ADDRESS)
 
 #define AFIO					((AFIO_TypeDef *)AFIO_BASE_ADDRESS)
+
+#define USART1					((USART_TypeDef *)(USART1_BASE_ADDRESS))
+#define USART2					((USART_TypeDef *)(USART2_BASE_ADDRESS))
+#define USART3					((USART_TypeDef *)(USART3_BASE_ADDRESS))
 //=======================================================
 
 //Clock Enable Macros
@@ -153,6 +186,14 @@ typedef struct{
 
 #define RCC_AFIO_CLK_EN()		(RCC->APB2ENR |= (1<<0))
 
+#define RCC_USART1_CLK_EN()		(RCC->APB2ENR |= (1<<14))
+#define RCC_USART2_CLK_EN()		(RCC->APB1ENR |= (1<<17))
+#define RCC_USART3_CLK_EN()		(RCC->APB1ENR |= (1<<18))
+
+//Clock Reset Macros
+#define RCC_USART1_CLK_RESET()	(RCC->APB2RSTR |= (1<<14))
+#define RCC_USART2_CLK_RESET()	(RCC->APB1RSTR |= (1<<17))
+#define RCC_USART3_CLK_RESET()	(RCC->APB1RSTR |= (1<<18))
 
 //=======================================================
 
@@ -177,6 +218,14 @@ typedef struct{
 #define EXTI13_IRQ					40
 #define EXTI14_IRQ					40
 #define EXTI15_IRQ					40
+
+
+//					USART
+#define USART1_IRQ					37
+#define USART2_IRQ					38
+#define USART3_IRQ					39
+
+
 
 
 //=======================================================
@@ -231,9 +280,14 @@ typedef struct{
 
 
 
+//USART
+#define NVIC_IRQ37_USART1_ENABLE	 (NVIC_ISER1 |= (1U << (USART1_IRQ-32)))
+#define NVIC_IRQ38_USART2_ENABLE	 (NVIC_ISER1 |= (1U << (USART2_IRQ-32)))
+#define NVIC_IRQ39_USART3_ENABLE	 (NVIC_ISER1 |= (1U << (USART3_IRQ-32)))
 
-
-
+#define NVIC_IRQ37_USART1_DISABLE	 (NVIC_ICER1 |= (1U << (USART1_IRQ-32)))
+#define NVIC_IRQ38_USART2_DISABLE	 (NVIC_ICER1 |= (1U << (USART2_IRQ-32)))
+#define NVIC_IRQ39_USART3_DISABLE	 (NVIC_ICER1 |= (1U << (USART3_IRQ-32)))
 
 
 

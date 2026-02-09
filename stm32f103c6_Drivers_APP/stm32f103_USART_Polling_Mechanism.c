@@ -14,18 +14,14 @@ void MyWait(uint32_t x){
 
 unsigned char ch;
 
-void CALL_BACK(void){
-	MCAL_USART_ReceiveData(USART1, &ch, Disable);
-	MCAL_USART_TransmitData(USART1, &ch, Enable);
-}
 
 int main(void)
 {
 	USART_Config Usart_cfg;
 	Usart_cfg.BaudRate = USART_BaudRate_115200;
 	Usart_cfg.HwFlowControl = USART_No_HwFlowControl;
-	Usart_cfg.Enable_IQR = USART_Enable_IQR_RXNE;
-	Usart_cfg.P_IRQ_CallBack = CALL_BACK;
+	Usart_cfg.Enable_IQR = USART_Enable_IQR_None;
+	Usart_cfg.P_IRQ_CallBack = NULL;
 	Usart_cfg.Parity = USART_NoParity;
 	Usart_cfg.PayLoad_Length = USART_PayLoad_Length_8DBits;
 	Usart_cfg.StopBits = USART_StopBits_1;
@@ -34,6 +30,7 @@ int main(void)
 	MCAL_USART_Init(USART1, &Usart_cfg);
 
     while(1){
-
+    	MCAL_USART_ReceiveData(USART1, &ch, Enable);
+    	MCAL_USART_TransmitData(USART1, &ch, Enable);
     }
 }

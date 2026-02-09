@@ -8,6 +8,8 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
+-include Stm32f103c6_Drivers/USART/subdir.mk
+-include Stm32f103c6_Drivers/RCC/subdir.mk
 -include Stm32f103c6_Drivers/GPIO/subdir.mk
 -include Stm32f103c6_Drivers/EXTI/subdir.mk
 -include Startup/subdir.mk
