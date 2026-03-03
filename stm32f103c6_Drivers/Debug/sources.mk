@@ -25,5 +25,6 @@ Startup \
 Stm32f103c6_Drivers/EXTI \
 Stm32f103c6_Drivers/GPIO \
 Stm32f103c6_Drivers/RCC \
+Stm32f103c6_Drivers/SPI \
 Stm32f103c6_Drivers/USART \
 

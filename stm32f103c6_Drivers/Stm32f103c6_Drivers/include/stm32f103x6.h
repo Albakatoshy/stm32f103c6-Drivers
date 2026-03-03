@@ -75,6 +75,9 @@
 #define USART1_BASE_ADDRESS								0x40013800UL
 
 
+//					SPI1
+#define SPI1_BASE_ADDRESS								0x40013000UL
+
 //----------------------------------
 //Base Addresses For The APB1 Peripherals
 //----------------------------------
@@ -85,6 +88,12 @@
 
 //					UART3
 #define USART3_BASE_ADDRESS								0x40004800UL
+
+
+
+//					SPI2
+#define SPI2_BASE_ADDRESS								0x40003800UL
+
 
 
 
@@ -153,6 +162,18 @@ typedef struct{
 	volatile uint32_t USART_GTPR;
 }USART_TypeDef;
 
+typedef struct{
+	volatile uint32_t SPI_CR1;
+	volatile uint32_t SPI_CR2;
+	volatile uint32_t SPI_SR;
+	volatile uint32_t SPI_DR;
+	volatile uint32_t SPI_CRCPR;
+	volatile uint32_t SPI_RXCRCR;
+	volatile uint32_t SPI_TXCRCR;
+	volatile uint32_t SPI_I2SCFGR;
+	volatile uint32_t SPI_I2SPR;
+}SPI_TypeDef;
+
 
 
 
@@ -175,6 +196,12 @@ typedef struct{
 #define USART1					((USART_TypeDef *)(USART1_BASE_ADDRESS))
 #define USART2					((USART_TypeDef *)(USART2_BASE_ADDRESS))
 #define USART3					((USART_TypeDef *)(USART3_BASE_ADDRESS))
+
+
+//					SPI
+#define SPI1					((SPI_TypeDef *)(SPI1_BASE_ADDRESS))
+#define SPI2					((SPI_TypeDef *)(SPI2_BASE_ADDRESS))
+
 //=======================================================
 
 //Clock Enable Macros
@@ -194,6 +221,16 @@ typedef struct{
 #define RCC_USART1_CLK_RESET()	(RCC->APB2RSTR |= (1<<14))
 #define RCC_USART2_CLK_RESET()	(RCC->APB1RSTR |= (1<<17))
 #define RCC_USART3_CLK_RESET()	(RCC->APB1RSTR |= (1<<18))
+
+// SPI CLOCK ENABLE
+#define RCC_SPI1_CLK_EN()		(RCC->APB2ENR |=(1<<12))
+#define RCC_SPI2_CLK_EN()		(RCC->APB1ENR |=(1<<14))
+
+// SPI CLOCK RESET
+#define RCC_SPI1_CLK_RESET()		(RCC->APB2RSTR |=(1<<12))
+#define RCC_SPI2_CLK_RESET()		(RCC->APB1RSTR |=(1<<14))
+
+
 
 //=======================================================
 
@@ -224,6 +261,13 @@ typedef struct{
 #define USART1_IRQ					37
 #define USART2_IRQ					38
 #define USART3_IRQ					39
+
+
+//					SPI
+#define SPI1_IRQ					35
+#define SPI2_IRQ					36
+
+
 
 
 
@@ -289,6 +333,12 @@ typedef struct{
 #define NVIC_IRQ38_USART2_DISABLE	 (NVIC_ICER1 |= (1U << (USART2_IRQ-32)))
 #define NVIC_IRQ39_USART3_DISABLE	 (NVIC_ICER1 |= (1U << (USART3_IRQ-32)))
 
+//SPI
+#define NVIC_IRQ35_SPI1_ENABLE		(NVIC_ISER1 |= (1U << (SPI1_IRQ-32)))
+#define NVIC_IRQ36_SPI2_ENABLE		(NVIC_ISER1 |= (1U << (SPI2_IRQ-32)))
+
+#define NVIC_IRQ35_SPI1_DISABLE	 	(NVIC_ICER1 |= (1U << (SPI1_IRQ-32)))
+#define NVIC_IRQ36_SPI2_DISABLE	 	(NVIC_ICER1 |= (1U << (SPI2_IRQ-32)))
 
 
 

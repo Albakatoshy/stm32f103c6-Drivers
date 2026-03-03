@@ -285,7 +285,7 @@ void MCAL_USART_ReceiveData(USART_TypeDef *USARTx, uint16_t *pRxBuffer, enum Pol
 	/* RXNE (bit 5) = read data register not empty */
 	if (PollEn == Enable)
 	{
-a		while (!(USARTx->USART_SR & (1U << 5)));
+		while (!(USARTx->USART_SR & (1U << 5)));
 	}
 
 	/* Read DR and mask according to payload/parity */
