@@ -8,6 +8,8 @@
 #include "stm32f103c6_SPI_Driver.h"
 
 SPI_Config *Global_SPI_Cfg[2] ={NULL,NULL};
+SPI_Config Global_SPI_Cfg1;
+SPI_Config Global_SPI_Cfg2;
 
 
 #define SPI_SR_TXE					((uint8_t)0x02)
@@ -20,11 +22,13 @@ void MCAL_SPI_Init(SPI_TypeDef *SPIx , SPI_Config *SPI_Config){
 
 
 	if(SPIx == SPI1){
-		Global_SPI_Cfg[0]=SPI_Config;
+		Global_SPI_Cfg1 = *SPI_Config;
+		Global_SPI_Cfg[0]=&Global_SPI_Cfg1;
 		RCC_SPI1_CLK_EN();
 	}
 	else if(SPIx == SPI2){
-		Global_SPI_Cfg[1]=SPI_Config;
+		Global_SPI_Cfg2 = *SPI_Config;
+		Global_SPI_Cfg[1]=&Global_SPI_Cfg2;
 		RCC_SPI2_CLK_EN();
 	}
 
